@@ -14,42 +14,35 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  // Listen for room creation and joining
   socket.on('createRoom', () => {
-    const roomId = uuidv4(); // Generate a unique room ID
-    socket.join(roomId); // Join the newly created room
-    socket.emit('roomCreated', roomId); // Notify the client of the room ID
+    const roomId = uuidv4();
+    socket.join(roomId);
+    socket.emit('roomCreated', roomId);
     console.log(`Room ${roomId} created by ${socket.id}`);
   });
 
   socket.on('joinRoom', (roomId) => {
-    socket.join(roomId); // Join the specified room
-    socket.broadcast.to(roomId).emit('message', 'A new user has joined the room');
+    socket.join(roomId);
+    socket.broadcast.to(roomId).emit('message', { text: 'A new user has joined the room', senderId: 'system' });
     console.log(`${socket.id} joined room ${roomId}`);
   });
 
-  // Handle chat messages in a specific room
   socket.on('chatMessage', ({ roomId, message }) => {
-    io.to(roomId).emit('message', message); // Broadcast to the room
+    io.to(roomId).emit('message', { text: message, senderId: socket.id });
   });
 
-  // Handle offer from a user
   socket.on('offer', ({ roomId, offer }) => {
-    console.log('Received offer:', offer);
-    socket.broadcast.to(roomId).emit('offer', offer); // Send offer to others in the room
+    socket.broadcast.to(roomId).emit('offer', offer);
   });
 
-  // Handle answer from a user
   socket.on('answer', ({ roomId, answer }) => {
-    socket.broadcast.to(roomId).emit('answer', answer); // Send answer to others in the room
+    socket.broadcast.to(roomId).emit('answer', answer);
   });
 
-  // Handle ICE candidate from a user
   socket.on('ice-candidate', ({ roomId, candidate }) => {
-    socket.broadcast.to(roomId).emit('ice-candidate', candidate); // Send candidate to others in the room
+    socket.broadcast.to(roomId).emit('ice-candidate', candidate);
   });
 
-  // Notify when a user disconnects
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
