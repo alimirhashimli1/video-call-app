@@ -1,10 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var config = {
-    content: ["./src/**/*.{html,js,ts,jsx,tsx}"],
-    theme: {
-        extend: {},
-    },
-    plugins: [],
-};
-exports.default = config;
+// tailwind.config.js
+const { defineConfig } = require('tailwindcss'); // Use require instead of import
+
+module.exports = defineConfig({
+  content: [
+    "./src/**/*.{html,js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+});
