@@ -10,11 +10,10 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "composite": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"],
-  "compilerOptions": {
-    "composite": true
-  }
+ 
 }
