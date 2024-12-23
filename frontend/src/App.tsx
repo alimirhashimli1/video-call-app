@@ -4,7 +4,7 @@ import io, { Socket } from 'socket.io-client';
 import 'tailwindcss/tailwind.css';
 
 // Initialize socket connection
-const socket: Socket = io('http://localhost:5000'); // Replace with your backend URL
+const socket: Socket = io('https://video-call-app-1-o75x.onrender.com'); 
 
 const App: React.FC = () => {
   return (
