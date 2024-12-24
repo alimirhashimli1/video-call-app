@@ -11,6 +11,8 @@ const io = socketIo(server, {
   },
 });
 
+const port = process.env.PORT || 5000;
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -48,6 +50,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(5000, () => {
+server.listen(port, () => {
   console.log('Chat server running on http://localhost:5000/');
 });
