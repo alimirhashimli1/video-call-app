@@ -1,27 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
     "module": "ESNext",
-    "lib": ["ESNext"],
-    "strict": true,
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true
   },
   "include": [
     "tailwind.config.ts",
     "src/**/*"
-  ],
-  "exclude": ["node_modules"],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
   ]
 }
