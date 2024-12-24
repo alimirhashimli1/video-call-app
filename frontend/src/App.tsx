@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { useNavigate, BrowserRouter as Router, Routes, Route, useParams, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
 import 'tailwindcss/tailwind.css';
 
@@ -77,28 +77,31 @@ const Room: React.FC = () => {
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const { roomId } = useParams<{ roomId: string }>();
+  const location = useLocation();
 
   const iceServers = [
     { urls: 'stun:stun.l.google.com:19302' },
   ];
 
   useEffect(() => {
-    socket.emit('joinRoom', roomId);
+    if (roomId) {
+      socket.emit('joinRoom', roomId);
 
-    socket.on('message', (msg: string, sender: 'self' | 'other') => {
-      setMessages((prev) => [...prev, { text: msg, sender }]);
-    });
+      socket.on('message', (msg: string, sender: 'self' | 'other') => {
+        setMessages((prev) => [...prev, { text: msg, sender }]);
+      });
 
-    socket.on('offer', handleOffer);
-    socket.on('answer', handleAnswer);
-    socket.on('ice-candidate', handleNewICECandidate);
+      socket.on('offer', handleOffer);
+      socket.on('answer', handleAnswer);
+      socket.on('ice-candidate', handleNewICECandidate);
 
-    return () => {
-      socket.off('message');
-      socket.off('offer');
-      socket.off('answer');
-      socket.off('ice-candidate');
-    };
+      return () => {
+        socket.off('message');
+        socket.off('offer');
+        socket.off('answer');
+        socket.off('ice-candidate');
+      };
+    }
   }, [roomId]);
 
   const startVideo = async () => {
@@ -195,9 +198,9 @@ const Room: React.FC = () => {
 
       {/* URL Display and Copy Button */}
       <div className="mb-6">
-        <p className="text-lg">Room URL: {window.location.href}</p>
+        <p className="text-lg">Room URL: {location.pathname}</p>
         <button
-          onClick={() => navigator.clipboard.writeText(window.location.href)}
+          onClick={() => navigator.clipboard.writeText(location.pathname)}
           className="mt-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
         >
           Copy URL
@@ -227,20 +230,19 @@ const Room: React.FC = () => {
       </div>
 
       {/* Chat Section */}
-      <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-4">
-        <ul className="space-y-2">
-          {messages.map((msg, index) => (
-            <li
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-4 space-y-4">
+        <div className="space-y-2 h-64 overflow-y-auto">
+          {messages.map((message, index) => (
+            <div
               key={index}
-              className={`text-gray-800 p-2 rounded-lg ${
-                msg.sender === 'self' ? 'bg-blue-100 text-left' : 'bg-green-100 text-right'
-              }`}
+              className={`p-2 rounded-lg ${message.sender === 'self' ? 'bg-blue-200' : 'bg-gray-200'}`}
             >
-              {msg.text}
-            </li>
+              {message.text}
+            </div>
           ))}
-        </ul>
-        <div className="mt-4 flex space-x-2">
+        </div>
+
+        <div className="flex space-x-2">
           <input
             type="text"
             value={messageInput}
@@ -250,7 +252,7 @@ const Room: React.FC = () => {
           />
           <button
             onClick={sendMessage}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg"
           >
             Send
           </button>
