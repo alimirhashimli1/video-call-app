@@ -226,13 +226,21 @@ const Room: React.FC = () => {
 
       {/* Chat Section */}
       <div className="flex flex-col items-center space-y-2 w-full max-w-lg">
-        <div className="overflow-y-auto max-h-40 w-full bg-gray-100 p-4 rounded-md shadow-md space-y-2 mb-4">
-          {messages.map((msg, index) => (
-            <p key={index} className={`text-sm ${msg.sender === 'self' ? 'text-blue-600' : 'text-gray-800'}`}>
-              {msg.text}
-            </p>
-          ))}
-        </div>
+      <div className="overflow-y-auto max-h-40 w-full bg-gray-100 p-4 rounded-md shadow-md space-y-2 mb-4">
+  {messages.map((msg, index) => {
+    if (!msg || typeof msg.text !== 'string' || typeof msg.sender !== 'string') {
+      console.warn(`Invalid message at index ${index}:`, msg);
+      return null; // Skip invalid messages
+    }
+
+    return (
+      <p key={index} className={`text-sm ${msg.sender === 'self' ? 'text-blue-600' : 'text-gray-800'}`}>
+        {msg.text}
+      </p>
+    );
+  })}
+</div>
+
 
         <div className="flex w-full max-w-lg">
           <input
