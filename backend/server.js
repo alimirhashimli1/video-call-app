@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid'); // Import UUID for room IDs
 const server = http.createServer();
 const io = socketIo(server, {
   cors: {
-    origin: 'https://video-call-app-ruby.vercel.app/',
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
