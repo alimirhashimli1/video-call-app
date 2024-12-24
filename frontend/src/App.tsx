@@ -1,73 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, BrowserRouter as Router, Routes, Route, useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
-import 'tailwindcss/tailwind.css';
 
 // Initialize socket connection
 const socket: Socket = io('https://video-call-app-1-o75x.onrender.com'); 
-
-const App: React.FC = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/room/:roomId" element={<Room />} />
-      </Routes>
-    </Router>
-  );
-};
-
-const Home: React.FC = () => {
-  const navigate = useNavigate();
-  const [roomUrl, setRoomUrl] = useState<string | null>(null);
-
-  const createRoom = () => {
-    socket.emit('createRoom');
-    socket.on('roomCreated', (roomId: string) => {
-      const url = `${window.location.origin}/room/${roomId}`;
-      setRoomUrl(url); // Set the URL for sharing
-      navigate(`/room/${roomId}`);
-    });
-  };
-
-  const copyToClipboard = () => {
-    if (roomUrl) {
-      navigator.clipboard.writeText(roomUrl);
-      alert('Room URL copied to clipboard!');
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-      <h1 className="text-4xl font-bold mb-8">Welcome to the Video Chat App</h1>
-      <button
-        onClick={createRoom}
-        className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition duration-300"
-      >
-        Create Room
-      </button>
-      {roomUrl && (
-        <div className="mt-4">
-          <p className="text-lg">Share this room URL:</p>
-          <div className="flex items-center space-x-4 mt-2">
-            <input
-              type="text"
-              value={roomUrl}
-              readOnly
-              className="px-4 py-2 border rounded-lg bg-gray-100 w-64"
-            />
-            <button
-              onClick={copyToClipboard}
-              className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
-            >
-              Copy URL
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 const Room: React.FC = () => {
   const [messages, setMessages] = useState<{ text: string; sender: 'self' | 'other' }[]>([]);
@@ -76,6 +12,7 @@ const Room: React.FC = () => {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null); // Hold local media stream
   const { roomId } = useParams<{ roomId: string }>();
   const location = useLocation();
 
@@ -100,12 +37,27 @@ const Room: React.FC = () => {
         socket.off('offer');
         socket.off('answer');
         socket.off('ice-candidate');
+        cleanupStream();
       };
     }
   }, [roomId]);
 
+  const cleanupStream = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
+    }
+
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+    }
+  };
+
   const startVideo = async () => {
+    // Stop any previous stream before starting a new one
+    cleanupStream();
+
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localStreamRef.current = stream; // Save the local stream for cleanup
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
@@ -262,4 +214,4 @@ const Room: React.FC = () => {
   );
 };
 
-export default App;
+export default Room;
