@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, BrowserRouter as  Routes, Route, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
 import 'tailwindcss/tailwind.css';
 
