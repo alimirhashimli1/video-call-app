@@ -6,8 +6,9 @@ const { v4: uuidv4 } = require('uuid'); // Import UUID for room IDs
 const server = http.createServer();
 const io = socketIo(server, {
   cors: {
-    origin: '*',
+    origin: ['https://video-call-app-ruby.vercel.app', 'http://localhost:3000'],  // Allow both production and local development URLs
     methods: ['GET', 'POST'],
+    credentials: true,  // Optional: Use this if you want to allow credentials (cookies, etc.)
   },
 });
 
@@ -51,5 +52,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-  console.log('Chat server running on http://localhost:5000/');
+  console.log(`Chat server running on http://localhost:${port}/`);
 });
