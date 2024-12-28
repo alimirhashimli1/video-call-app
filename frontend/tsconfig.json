@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
+    "target": "es5", 
+    "module": "esnext", 
+    "jsx": "react-jsx", 
+    "strict": true, 
+    "outDir": "./dist", 
     "moduleResolution": "node",
-    "target": "ESNext",
-    "jsx": "react-jsx",
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": false
   },
-  "include": [
-    "tailwind.config.ts",
-    "src/**/*"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

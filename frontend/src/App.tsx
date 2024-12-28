@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
 import 'tailwindcss/tailwind.css';
 
@@ -8,10 +8,12 @@ const socket: Socket = io('https://video-call-app-1-o75x.onrender.com');
 
 const App: React.FC = () => {
   return (
+      <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/room/:roomId" element={<Room />} />
       </Routes>
+    </Router>
   );
 };
 
