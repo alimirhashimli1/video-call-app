@@ -8,12 +8,16 @@ const socket: Socket = io('https://video-call-app-1-o75x.onrender.com');
 
 const App: React.FC = () => {
   return (
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/room/:roomId" element={<Room />} />
+    <Routes> 
+      <Route path="/" element={<Home />} />
+      <Route path="/room/:roomId" element={<Room />} />
       </Routes>
+
   );
 };
+
+// Your Home and Room components remain unchanged
+
 
 const Home: React.FC = () => {
   const navigate = useNavigate();

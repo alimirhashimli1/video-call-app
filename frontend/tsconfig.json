@@ -1,15 +1,39 @@
 {
   "compilerOptions": {
-    "target": "es5", 
-    "module": "esnext", 
-    "jsx": "react-jsx", 
-    "strict": true, 
-    "outDir": "./dist", 
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noEmit": false
+    /* Target settings */
+    "target": "es2016",                         /* Set the JavaScript language version for emitted JavaScript */
+    
+    /* Module settings */
+    "module": "esnext",                          /* Use ESNext module system for compatibility with modern JavaScript bundlers */
+    "moduleResolution": "node",                  /* Use Node.js module resolution strategy */
+
+    /* JSX settings */
+    "jsx": "react-jsx",                         /* Use the modern JSX transform for React 17+ */
+
+    /* JavaScript support settings */
+    "allowJs": true,                            /* Allow JavaScript files in the project */
+    "esModuleInterop": true,                    /* Enable interoperability between CommonJS and ESModules */
+    "forceConsistentCasingInFileNames": true,    /* Ensure correct casing in import paths */
+
+    /* Strict type-checking settings */
+    "strict": true,                             /* Enable all strict type-checking options */
+    
+    /* Output settings */
+    "outDir": "./dist",                         /* Specify the output folder for compiled JavaScript files */
+    "sourceMap": true,                          /* Generate source maps for debugging */
+    "declaration": true,                        /* Generate type declaration files (.d.ts) */
+    
+    /* Additional settings */
+    "resolveJsonModule": true,                  /* Allow importing JSON modules */
+    "skipLibCheck": true                        /* Skip type checking of all declaration files */
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  
+  "include": [
+    "src/**/*"                                  /* Include all files in the src directory for compilation */
+  ],
+
+  "exclude": [
+    "node_modules",                             /* Exclude node_modules from compilation */
+    "dist"                                      /* Exclude the dist folder (output folder) */
+  ]
 }
