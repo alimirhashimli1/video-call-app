@@ -3,8 +3,13 @@ import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import io, { Socket } from "socket.io-client";
 import "tailwindcss/tailwind.css";
 
+const BACKEND_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000"
+    : "https://video-call-app-1-o75x.onrender.com";
+
 // Initialize socket connection
-const socket: Socket = io("https://video-call-app-1-o75x.onrender.com");
+const socket: Socket = io(BACKEND_URL);
 
 const App: React.FC = () => {
   return (
@@ -15,23 +20,19 @@ const App: React.FC = () => {
   );
 };
 
-// Your Home and Room components remain unchanged
-
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [roomUrl, setRoomUrl] = useState<string | null>(null);
 
-  // Create a new room and generate the URL
   const createRoom = () => {
     socket.emit("createRoom");
     socket.on("roomCreated", (roomId: string) => {
       const url = `${window.location.origin}/room/${roomId}`;
-      setRoomUrl(url); // Set the URL for sharing
+      setRoomUrl(url);
       navigate(`/room/${roomId}`);
     });
   };
 
-  // Copy the room URL to clipboard
   const copyToClipboard = () => {
     if (roomUrl) {
       navigator.clipboard.writeText(roomUrl);
@@ -76,7 +77,8 @@ const Room: React.FC = () => {
     { text: string; sender: "self" | "other" }[]
   >([]);
   const [messageInput, setMessageInput] = useState<string>("");
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isVideoActive, setIsVideoActive] = useState(false);
+  const [isCallActive, setIsCallActive] = useState(false);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -88,7 +90,6 @@ const Room: React.FC = () => {
     socket.emit("joinRoom", roomId);
 
     socket.on("message", (msg: { text: string; senderId: string }) => {
-      // Check if the sender is the current user's socket ID
       const sender = msg.senderId === socket.id ? "self" : "other";
       setMessages((prev) => [...prev, { text: msg.text, sender }]);
     });
@@ -106,39 +107,59 @@ const Room: React.FC = () => {
   }, [roomId]);
 
   const startVideo = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
+    if (!isVideoActive) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
 
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = stream;
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+
+      peerConnectionRef.current = new RTCPeerConnection({ iceServers });
+      stream
+        .getTracks()
+        .forEach((track) =>
+          peerConnectionRef.current?.addTrack(track, stream)
+        );
+
+      peerConnectionRef.current.ontrack = (event) => {
+        if (remoteVideoRef.current && event.streams[0]) {
+          remoteVideoRef.current.srcObject = event.streams[0];
+        }
+      };
+
+      peerConnectionRef.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit("ice-candidate", { roomId, candidate: event.candidate });
+        }
+      };
+    } else {
+      const stream = localVideoRef.current?.srcObject as MediaStream;
+      stream?.getTracks().forEach((track) => track.stop());
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = null;
+      }
     }
-
-    peerConnectionRef.current = new RTCPeerConnection({ iceServers });
-    stream
-      .getTracks()
-      .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
-
-    peerConnectionRef.current.ontrack = (event) => {
-      if (remoteVideoRef.current && event.streams[0]) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-      }
-    };
-
-    peerConnectionRef.current.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("ice-candidate", { roomId, candidate: event.candidate });
-      }
-    };
+    setIsVideoActive(!isVideoActive);
   };
 
   const startCall = async () => {
-    const offer = await peerConnectionRef.current?.createOffer();
-    if (offer) {
-      await peerConnectionRef.current?.setLocalDescription(offer);
-      socket.emit("offer", { roomId, offer });
+    if (!isCallActive) {
+      const offer = await peerConnectionRef.current?.createOffer();
+      if (offer) {
+        await peerConnectionRef.current?.setLocalDescription(offer);
+        socket.emit("offer", { roomId, offer });
+      }
+    } else {
+      peerConnectionRef.current?.close();
+      peerConnectionRef.current = null;
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
     }
+    setIsCallActive(!isCallActive);
   };
 
   const handleOffer = async (offer: RTCSessionDescriptionInit) => {
@@ -171,107 +192,68 @@ const Room: React.FC = () => {
     }
   };
 
-  const toggleFullscreen = (videoRef: React.RefObject<HTMLVideoElement>) => {
-    if (videoRef.current) {
-      if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
-      }
-    }
-  };
-
-  const handleFullScreenToggle = () => {
-    setIsFullScreen(!isFullScreen);
-  };
-
   return (
-    <div
-      className={`h-screen bg-gray-100 flex flex-col items-center p-6 ${
-        isFullScreen ? "overflow-hidden" : ""
-      }`}
-    >
+    <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-2xl font-bold mb-6">Room: {roomId}</h1>
-
-      {/* Video Section */}
-      <div
-        className={`flex ${
-          isFullScreen
-            ? "absolute top-0 left-0 w-full h-full z-10"
-            : "space-x-6 mb-6"
-        }`}
-      >
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          onClick={() => toggleFullscreen(localVideoRef)}
-          className={`w-64 h-48 bg-black rounded-md shadow-md cursor-pointer ${
-            isFullScreen ? "w-full h-full" : ""
-          }`}
-        />
-        {!isFullScreen && (
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            onClick={() => toggleFullscreen(remoteVideoRef)}
-            className="w-64 h-48 bg-black rounded-md shadow-md cursor-pointer"
-          />
-        )}
-      </div>
-
-      {/* URL Display and Copy Button */}
-      <div className="mb-6">
-        <p className="text-lg">Room URL: {window.location.href}</p>
-        <button
-          onClick={() => navigator.clipboard.writeText(window.location.href)}
-          className="mt-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
-        >
-          Copy URL
-        </button>
-      </div>
-
-      {/* Video Controls */}
       <div className="flex space-x-4 mb-6">
         <button
           onClick={startVideo}
           className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
         >
-          Start Video
+          {isVideoActive ? "Stop Video" : "Start Video"}
         </button>
         <button
           onClick={startCall}
           className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
         >
-          Start Call
-        </button>
-        <button
-          onClick={handleFullScreenToggle}
-          className="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700"
-        >
-          Toggle Fullscreen
+          {isCallActive ? "Stop Call" : "Start Call"}
         </button>
       </div>
-
-      {/* Chat Section */}
-      <div className="flex flex-col items-center space-y-2 w-full max-w-lg">
-        <div className="overflow-y-auto max-h-40 w-full bg-gray-100 p-4 rounded-md shadow-md space-y-2 mb-4">
-          {messages.map((msg, index) => (
-            <p key={index} className={`text-sm ${msg.sender === 'self' ? 'text-blue-600' : 'text-gray-800'}`}>
-              {msg.text}
-            </p>
+      <div className="flex space-x-4 mb-6">
+        <video
+          ref={localVideoRef}
+          autoPlay
+          muted
+          className="w-1/3 bg-black rounded-lg"
+        ></video>
+        <video
+          ref={remoteVideoRef}
+          autoPlay
+          className="w-1/3 bg-black rounded-lg"
+        ></video>
+      </div>
+      <div className="w-full max-w-md">
+        <div className="bg-white shadow-lg rounded-lg p-4 overflow-y-scroll h-64 mb-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`${
+                message.sender === "self" ? "text-right" : "text-left"
+              }`}
+            >
+              <p
+                className={`inline-block px-4 py-2 rounded-lg ${
+                  message.sender === "self"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+              >
+                {message.text}
+              </p>
+            </div>
           ))}
         </div>
-
-        <div className="flex w-full max-w-lg">
+        <div className="flex space-x-2">
           <input
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            className="w-full p-2 border rounded-l-md"
+            className="flex-grow px-4 py-2 border rounded-lg"
             placeholder="Type a message..."
           />
           <button
             onClick={sendMessage}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-r-md"
+            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
           >
             Send
           </button>
