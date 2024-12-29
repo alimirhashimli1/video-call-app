@@ -8,7 +8,6 @@ const BACKEND_URL =
     ? "http://localhost:5000"
     : "https://video-call-app-1-o75x.onrender.com";
 
-// Initialize socket connection
 const socket: Socket = io(BACKEND_URL);
 
 const App: React.FC = () => {
@@ -79,6 +78,7 @@ const Room: React.FC = () => {
   const [messageInput, setMessageInput] = useState<string>("");
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -192,6 +192,10 @@ const Room: React.FC = () => {
     }
   };
 
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+  };
+
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-2xl font-bold mb-6">Room: {roomId}</h1>
@@ -209,54 +213,70 @@ const Room: React.FC = () => {
           {isCallActive ? "Stop Call" : "Start Call"}
         </button>
       </div>
-      <div className="flex space-x-4 mb-6">
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          className="w-1/3 bg-black rounded-lg"
-        ></video>
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          className="w-1/3 bg-black rounded-lg"
-        ></video>
+      <div
+        className={`${
+          isFullScreen ? "w-full h-full flex flex-col items-center" : "flex space-x-4 mb-6"
+        }`}
+      >
+        <div className="relative">
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            className={`${
+              isFullScreen ? "w-full h-auto" : "w-2/5 h-auto bg-black rounded-lg shadow-lg"
+            }`}
+          ></video>
+          <button
+            onClick={toggleFullScreen}
+            className="absolute bottom-4 right-4 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700"
+          >
+            {isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+          </button>
+        </div>
+        {!isFullScreen && (
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            className="w-2/5 h-auto bg-black rounded-lg shadow-lg"
+          ></video>
+        )}
       </div>
-      <div className="w-full max-w-md">
-        <div className="bg-white shadow-lg rounded-lg p-4 overflow-y-scroll h-64 mb-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`${
-                message.sender === "self" ? "text-right" : "text-left"
-              }`}
-            >
-              <p
-                className={`inline-block px-4 py-2 rounded-lg ${
-                  message.sender === "self"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
+      <div
+        className={`w-full max-w-md ${
+          isFullScreen ? "absolute bottom-4 left-4 bg-white" : "mb-6"
+        }`}
+      >
+        <div className="bg-gray-100 shadow-md rounded-lg p-4">
+          <h2 className="text-lg font-bold mb-2">Chat</h2>
+          <div className="h-40 overflow-y-auto mb-4 bg-gray-200 p-4 rounded-md">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`${
+                  msg.sender === "self"
+                    ? "text-right text-blue-600"
+                    : "text-left text-gray-800"
                 }`}
               >
-                {message.text}
-              </p>
-            </div>
-          ))}
-        </div>
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            className="flex-grow px-4 py-2 border rounded-lg"
-            placeholder="Type a message..."
-          />
-          <button
-            onClick={sendMessage}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
-          >
-            Send
-          </button>
+                {msg.text}
+              </div>
+            ))}
+          </div>
+          <div className="flex">
+            <input
+              type="text"
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              className="flex-1 px-4 py-2 border rounded-l-lg"
+            />
+            <button
+              onClick={sendMessage}
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-r-lg shadow-md hover:bg-blue-700"
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
