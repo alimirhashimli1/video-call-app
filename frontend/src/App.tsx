@@ -129,9 +129,7 @@ const Room: React.FC = () => {
       peerConnectionRef.current = new RTCPeerConnection({ iceServers });
       stream
         .getTracks()
-        .forEach((track) =>
-          peerConnectionRef.current?.addTrack(track, stream)
-        );
+        .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
       peerConnectionRef.current.ontrack = (event) => {
         if (remoteVideoRef.current && event.streams[0]) {
@@ -203,45 +201,45 @@ const Room: React.FC = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
-       <div className="relative flex flex-col items-center bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white p-6 rounded-lg shadow-lg mb-8">
-      <h1 className="text-3xl font-extrabold tracking-wide mb-4">
-        Room: <span className="underline decoration-wavy decoration-yellow-400">{roomId}</span>
+     <div className="relative flex flex-col items-center mb-8">
+      <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md">
+        Room ID: {roomId}
       </h1>
-      <button
-        onClick={handleCopy}
-        className="px-6 py-2 bg-yellow-400 text-purple-800 font-semibold rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
-      >
-        Copy Room ID
-      </button>
 
-      {showCopyModal && (
-        <div className="absolute top-0 mt-2 p-4 bg-black bg-opacity-75 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
-          <p className="text-sm font-medium">Room ID copied to clipboard!</p>
-        </div>
-      )}
-    </div>
+        <button
+          onClick={handleCopy}
+          className="px-6 py-2 bg-yellow-400 text-purple-800 font-semibold rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
+        >
+          Copy Room ID
+        </button>
+
+        {showCopyModal && (
+          <div className="absolute top-0 mt-2 p-4 bg-black bg-opacity-75 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
+            <p className="text-sm font-medium">Room ID copied to clipboard!</p>
+          </div>
+        )}
+      </div>
       <div className="flex space-x-4 mb-6">
-       <button
-  onClick={startVideo}
-  className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
-    isVideoActive
-      ? "bg-blue-600 text-white hover:bg-blue-700"
-      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-  }`}
->
-  {isVideoActive ? "Stop Video" : "Start Video"}
-</button>
-<button
-  onClick={startCall}
-  className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
-    isCallActive
-      ? "bg-green-600 text-white hover:bg-green-700"
-      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-  }`}
->
-  {isCallActive ? "Stop Call" : "Start Call"}
-</button>
-
+        <button
+          onClick={startVideo}
+          className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+            isVideoActive
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+          }`}
+        >
+          {isVideoActive ? "Stop Video" : "Start Video"}
+        </button>
+        <button
+          onClick={startCall}
+          className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+            isCallActive
+              ? "bg-green-600 text-white hover:bg-green-700"
+              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+          }`}
+        >
+          {isCallActive ? "Stop Call" : "Start Call"}
+        </button>
       </div>
       <div className="flex space-x-4 mb-6 w-full justify-center">
         <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
