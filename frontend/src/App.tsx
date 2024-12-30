@@ -15,7 +15,7 @@ const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/room/:roomId" element={<Room />} />
+      <Route path="/room/:roomId" element={<Room roomUrl="" />} />
     </Routes>
   );
 };
@@ -72,7 +72,7 @@ const Home: React.FC = () => {
   );
 };
 
-const Room: React.FC = () => {
+const Room:  React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
   const [messages, setMessages] = useState<
     { text: string; sender: "self" | "other" }[]
   >([]);
@@ -109,7 +109,7 @@ const Room: React.FC = () => {
 
   const handleCopy = () => {
     if (roomId) {
-      navigator.clipboard.writeText(roomId);
+      navigator.clipboard.writeText(roomUrl);
       setShowCopyModal(true);
       setTimeout(() => setShowCopyModal(false), 2000); // Hide modal after 2 seconds
     }
@@ -201,24 +201,26 @@ const Room: React.FC = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
-     <div className="relative flex flex-col items-center mb-8">
-      <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md">
-        Room ID: {roomId}
+        <div className="relative flex flex-col items-center mb-8">
+      <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md text-center">
+        Room URL
       </h1>
+      <p className="mt-4 text-lg text-gray-700 font-medium px-4 py-2 bg-gray-100 rounded-lg shadow-sm">
+        {roomUrl}
+      </p>
+      <button
+        onClick={handleCopy}
+        className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+      >
+        Copy URL
+      </button>
 
-        <button
-          onClick={handleCopy}
-          className="px-6 py-2 bg-yellow-400 text-purple-800 font-semibold rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
-        >
-          Copy Room ID
-        </button>
-
-        {showCopyModal && (
-          <div className="absolute top-0 mt-2 p-4 bg-black bg-opacity-75 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
-            <p className="text-sm font-medium">Room ID copied to clipboard!</p>
-          </div>
-        )}
-      </div>
+      {showCopyModal && (
+        <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
+          <p className="text-sm font-medium">Room URL copied to clipboard!</p>
+        </div>
+      )}
+    </div>
       <div className="flex space-x-4 mb-6">
         <button
           onClick={startVideo}
