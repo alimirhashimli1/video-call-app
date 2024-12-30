@@ -196,18 +196,27 @@ const Room: React.FC = () => {
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-2xl font-bold mb-6">Room: {roomId}</h1>
       <div className="flex space-x-4 mb-6">
-        <button
-          onClick={startVideo}
-          className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
-        >
-          {isVideoActive ? "Stop Video" : "Start Video"}
-        </button>
-        <button
-          onClick={startCall}
-          className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700"
-        >
-          {isCallActive ? "Stop Call" : "Start Call"}
-        </button>
+      <button
+  onClick={startVideo}
+  className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+    isVideoActive
+      ? "bg-blue-600 text-white hover:bg-blue-700"
+      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+  }`}
+>
+  {isVideoActive ? "Stop Video" : "Start Video"}
+</button>
+<button
+  onClick={startCall}
+  className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+    isCallActive
+      ? "bg-green-600 text-white hover:bg-green-700"
+      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+  }`}
+>
+  {isCallActive ? "Stop Call" : "Start Call"}
+</button>
+
       </div>
       <div className="flex space-x-4 mb-6 w-full justify-center">
         <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
