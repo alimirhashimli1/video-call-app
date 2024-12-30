@@ -82,6 +82,7 @@ const Room: React.FC = () => {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const [showCopyModal, setShowCopyModal] = useState(false);
   const { roomId } = useParams<{ roomId: string }>();
 
   const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
@@ -105,6 +106,14 @@ const Room: React.FC = () => {
       socket.off("ice-candidate");
     };
   }, [roomId]);
+
+  const handleCopy = () => {
+    if (roomId) {
+      navigator.clipboard.writeText(roomId);
+      setShowCopyModal(true);
+      setTimeout(() => setShowCopyModal(false), 2000); // Hide modal after 2 seconds
+    }
+  };
 
   const startVideo = async () => {
     if (!isVideoActive) {
@@ -194,7 +203,23 @@ const Room: React.FC = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
-      <h1 className="text-2xl font-bold mb-6">Room: {roomId}</h1>
+       <div className="relative flex flex-col items-center bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white p-6 rounded-lg shadow-lg mb-8">
+      <h1 className="text-3xl font-extrabold tracking-wide mb-4">
+        Room: <span className="underline decoration-wavy decoration-yellow-400">{roomId}</span>
+      </h1>
+      <button
+        onClick={handleCopy}
+        className="px-6 py-2 bg-yellow-400 text-purple-800 font-semibold rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
+      >
+        Copy Room ID
+      </button>
+
+      {showCopyModal && (
+        <div className="absolute top-0 mt-2 p-4 bg-black bg-opacity-75 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
+          <p className="text-sm font-medium">Room ID copied to clipboard!</p>
+        </div>
+      )}
+    </div>
       <div className="flex space-x-4 mb-6">
        <button
   onClick={startVideo}
