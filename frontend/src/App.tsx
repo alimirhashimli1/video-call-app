@@ -79,10 +79,15 @@ const Room: React.FC = () => {
   const [messageInput, setMessageInput] = useState<string>("");
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isVideoEnlarged, setIsVideoEnlarged] = useState(false);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const { roomId } = useParams<{ roomId: string }>();
+
+  const toggleEnlargeVideo = () => {
+    setIsVideoEnlarged((prev) => !prev);
+  };
 
   const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
@@ -196,30 +201,33 @@ const Room: React.FC = () => {
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-2xl font-bold mb-6">Room: {roomId}</h1>
       <div className="flex space-x-4 mb-6">
-      <button
-  onClick={startVideo}
-  className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
-    isVideoActive
-      ? "bg-blue-600 text-white hover:bg-blue-700"
-      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-  }`}
->
-  {isVideoActive ? "Stop Video" : "Start Video"}
-</button>
-<button
-  onClick={startCall}
-  className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
-    isCallActive
-      ? "bg-green-600 text-white hover:bg-green-700"
-      : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-  }`}
->
-  {isCallActive ? "Stop Call" : "Start Call"}
-</button>
-
+        <button
+          onClick={startVideo}
+          className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+            isVideoActive
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+          }`}
+        >
+          {isVideoActive ? "Stop Video" : "Start Video"}
+        </button>
+        <button
+          onClick={startCall}
+          className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+            isCallActive
+              ? "bg-green-600 text-white hover:bg-green-700"
+              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+          }`}
+        >
+          {isCallActive ? "Stop Call" : "Start Call"}
+        </button>
       </div>
       <div className="flex space-x-4 mb-6 w-full justify-center">
-        <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
+        <div
+          className={`relative ${
+            isVideoEnlarged ? "w-3/4" : "w-1/2 md:w-1/3"
+          } bg-black rounded-lg shadow-lg p-2 transition-all duration-300`}
+        >
           <video
             ref={localVideoRef}
             autoPlay
@@ -229,17 +237,42 @@ const Room: React.FC = () => {
           <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
             Your Video
           </div>
+          <button
+            onClick={toggleEnlargeVideo}
+            className="absolute bottom-2 right-2 px-4 py-2 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-600"
+          >
+            {isVideoEnlarged ? "Shrink" : "Enlarge"}
+          </button>
         </div>
-        <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            className="w-full h-full object-cover rounded-lg"
-          ></video>
-          <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
-            Remote Video
+        {isVideoEnlarged && (
+          <div className="flex flex-col space-y-4 w-1/4">
+            {/* Placeholder for other clients' videos */}
+            {[1, 2, 3].map((_, index) => (
+              <div
+                key={index}
+                className="bg-black rounded-lg shadow-lg p-2 h-24"
+              >
+                <video
+                  autoPlay
+                  muted
+                  className="w-full h-full object-cover rounded-lg"
+                ></video>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
+        {!isVideoEnlarged && (
+          <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              className="w-full h-full object-cover rounded-lg"
+            ></video>
+            <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
+              Remote Video
+            </div>
+          </div>
+        )}
       </div>
       <div className="w-full max-w-md">
         <div className="bg-white shadow-lg rounded-lg p-4 overflow-y-scroll h-64 mb-4">
