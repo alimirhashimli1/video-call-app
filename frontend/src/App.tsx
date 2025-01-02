@@ -41,11 +41,11 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white px-6 py-8">
       <h1 className="text-4xl font-bold mb-8">Welcome to the Video Chat App</h1>
       <button
         onClick={createRoom}
-        className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition duration-300"
+        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
       >
         Create Room
       </button>
@@ -72,7 +72,7 @@ const Home: React.FC = () => {
   );
 };
 
-const Room:  React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
+const Room: React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
   const [messages, setMessages] = useState<
     { text: string; sender: "self" | "other" }[]
   >([]);
@@ -201,98 +201,95 @@ const Room:  React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
-        <div className="relative flex flex-col items-center mb-8">
-      <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md text-center">
-        Room URL
-      </h1>
-      <p className="mt-4 text-lg text-gray-700 font-medium px-4 py-2 bg-gray-100 rounded-lg shadow-sm">
-        {roomUrl}
-      </p>
-      <button
-        onClick={handleCopy}
-        className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-      >
-        Copy URL
-      </button>
+      <div className="relative flex flex-col items-center mb-8 w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md text-center">
+          Room URL
+        </h1>
+        <p className="mt-4 text-lg text-gray-700 font-medium px-4 py-2 bg-gray-100 rounded-lg shadow-sm">
+          {roomUrl}
+        </p>
+        <button
+          onClick={handleCopy}
+          className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+        >
+          Copy URL
+        </button>
 
-      {showCopyModal && (
-        <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
-          <p className="text-sm font-medium">Room URL copied to clipboard!</p>
-        </div>
-      )}
-    </div>
-      <div className="flex space-x-4 mb-6">
+        {showCopyModal && (
+          <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
+            <p className="text-sm font-medium">Room URL copied to clipboard!</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap justify-center mb-6 space-x-4 w-full max-w-md">
         <button
           onClick={startVideo}
-          className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
             isVideoActive
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-          }`}
+              ? "bg-teal-600 text-white hover:bg-teal-700"
+              : "bg-gray-400 text-gray-800 hover:bg-gray-500"
+          } w-32 mb-4 md:mb-0`}
         >
           {isVideoActive ? "Stop Video" : "Start Video"}
         </button>
         <button
           onClick={startCall}
-          className={`px-4 py-2 font-semibold rounded-lg shadow-md ${
+          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
             isCallActive
-              ? "bg-green-600 text-white hover:bg-green-700"
-              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-          }`}
+              ? "bg-red-600 text-white hover:bg-red-700"
+              : "bg-green-600 text-white hover:bg-green-700"
+          } w-32 mb-4 md:mb-0`}
         >
-          {isCallActive ? "Stop Call" : "Start Call"}
+          {isCallActive ? "End Call" : "Start Call"}
         </button>
       </div>
-      <div className="flex space-x-4 mb-6 w-full justify-center">
-        <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
+
+      <div className="w-full max-w-md mb-4">
+        <div className="flex flex-col space-y-4 bg-white p-4 rounded-lg shadow-lg">
           <video
             ref={localVideoRef}
             autoPlay
             muted
-            className="w-full h-full object-cover rounded-lg"
-          ></video>
-          <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
-            Your Video
-          </div>
-        </div>
-        <div className="relative w-1/2 md:w-1/3 bg-black rounded-lg shadow-lg p-2">
+            className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
+          />
           <video
             ref={remoteVideoRef}
             autoPlay
-            className="w-full h-full object-cover rounded-lg"
-          ></video>
-          <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
-            Remote Video
-          </div>
+            className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
+          />
         </div>
       </div>
+
       <div className="w-full max-w-md">
-        <div className="bg-white shadow-lg rounded-lg p-4 overflow-y-scroll h-64 mb-4">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`mb-2 p-2 rounded-lg ${
-                msg.sender === "self" ? "bg-blue-100 text-right" : "bg-gray-200"
-              }`}
-            >
-              <p>{msg.text}</p>
-            </div>
-          ))}
-        </div>
-        <div className="flex">
+        <div className="flex items-center space-x-4">
           <input
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg"
-            placeholder="Type a message..."
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Type a message"
           />
           <button
             onClick={sendMessage}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg ml-2"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Send
           </button>
+        </div>
+        <div className="mt-4 space-y-4">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`p-2 rounded-lg ${
+                msg.sender === "self"
+                  ? "bg-blue-600 text-white text-right"
+                  : "bg-gray-300 text-black"
+              }`}
+            >
+              {msg.text}
+            </div>
+          ))}
         </div>
       </div>
     </div>
