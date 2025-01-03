@@ -16,9 +16,10 @@ const Room: React.FC = () => {
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const [showCopyModal, setShowCopyModal] = useState(false);
-  const [enlargedVideo, setEnlargedVideo] = useState<"local" | "remote" | null>(
-    null
-  );
+  const [isLocalVideoEnlarged, setIsLocalVideoEnlarged] = useState(false);
+  const [isRemoteVideoEnlarged, setIsRemoteVideoEnlarged] = useState(false);
+
+
   const { roomId } = useParams<{ roomId: string }>();
 
   const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
@@ -136,9 +137,6 @@ const Room: React.FC = () => {
     }
   };
 
-  const toggleVideoSize = (videoType: "local" | "remote") => {
-    setEnlargedVideo((prev) => (prev === videoType ? null : videoType));
-  };
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
@@ -186,24 +184,40 @@ const Room: React.FC = () => {
         </button>
       </div>
 
-      <div className="w-full max-w-md mb-4">
-        <div className="flex flex-col space-y-4 bg-white p-4 rounded-lg shadow-lg">
+      <div className="flex flex-col items-center space-y-4">
+        <div
+          className={`relative transition-all ${
+            isLocalVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          }`}
+        >
           <video
             ref={localVideoRef}
             autoPlay
             muted
-            className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
+            className="w-full h-full object-cover rounded-lg"
           />
+          <button
+            onClick={() => setIsLocalVideoEnlarged(!isLocalVideoEnlarged)}
+            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+          >
+            {isLocalVideoEnlarged ? "Minimize Local" : "Enlarge Local"}
+          </button>
+        </div>
+        <div
+          className={`relative transition-all ${
+            isRemoteVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          }`}
+        >
           <video
             ref={remoteVideoRef}
             autoPlay
-            className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
+            className="w-full h-full object-cover rounded-lg"
           />
           <button
-            onClick={() => toggleVideoSize("remote")}
+            onClick={() => setIsRemoteVideoEnlarged(!isRemoteVideoEnlarged)}
             className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
           >
-            {enlargedVideo === "remote" ? "Minimize" : "Enlarge"}
+            {isRemoteVideoEnlarged ? "Minimize Remote" : "Enlarge Remote"}
           </button>
         </div>
       </div>
