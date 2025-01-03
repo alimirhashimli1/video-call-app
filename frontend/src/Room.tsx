@@ -5,7 +5,7 @@ import { socket } from "./socket/socket";
 const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
 
-const Room: React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
+const Room: React.FC = () => {
   const [messages, setMessages] = useState<
     { text: string; sender: "self" | "other" }[]
   >([]);
@@ -18,7 +18,9 @@ const Room: React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
   const [showCopyModal, setShowCopyModal] = useState(false);
   const { roomId } = useParams<{ roomId: string }>();
 
-  
+  const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
+
+
   useEffect(() => {
     socket.emit("joinRoom", roomId);
 
@@ -43,7 +45,7 @@ const Room: React.FC<{ roomUrl: string }> = ({ roomUrl }) => {
     if (roomId) {
       navigator.clipboard.writeText(roomUrl);
       setShowCopyModal(true);
-      setTimeout(() => setShowCopyModal(false), 2000); // Hide modal after 2 seconds
+      setTimeout(() => setShowCopyModal(false), 2000); 
     }
   };
 
