@@ -16,6 +16,9 @@ const Room: React.FC = () => {
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const [showCopyModal, setShowCopyModal] = useState(false);
+  const [enlargedVideo, setEnlargedVideo] = useState<"local" | "remote" | null>(
+    null
+  );
   const { roomId } = useParams<{ roomId: string }>();
 
   const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
@@ -133,6 +136,10 @@ const Room: React.FC = () => {
     }
   };
 
+  const toggleVideoSize = (videoType: "local" | "remote") => {
+    setEnlargedVideo((prev) => (prev === videoType ? null : videoType));
+  };
+
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
       <div className="relative flex flex-col items-center mb-8 w-full max-w-md">
@@ -192,6 +199,12 @@ const Room: React.FC = () => {
             autoPlay
             className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
           />
+          <button
+            onClick={() => toggleVideoSize("remote")}
+            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+          >
+            {enlargedVideo === "remote" ? "Minimize" : "Enlarge"}
+          </button>
         </div>
       </div>
 
