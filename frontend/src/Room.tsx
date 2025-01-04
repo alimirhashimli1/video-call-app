@@ -153,14 +153,14 @@ const Room: React.FC = () => {
         >
           Copy URL
         </button>
-
+  
         {showCopyModal && (
           <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
             <p className="text-sm font-medium">Room URL copied to clipboard!</p>
           </div>
         )}
       </div>
-
+  
       <div className="flex flex-wrap justify-center mb-6 space-x-4 w-full max-w-md">
         <button
           onClick={startVideo}
@@ -183,7 +183,7 @@ const Room: React.FC = () => {
           {isCallActive ? "End Call" : "Start Call"}
         </button>
       </div>
-
+  
       <div className="flex flex-col items-center space-y-4">
         <div
           className={`relative transition-all ${
@@ -221,7 +221,7 @@ const Room: React.FC = () => {
           </button>
         </div>
       </div>
-
+  
       <div className="w-full max-w-md">
         <div className="flex items-center space-x-4">
           <input
@@ -255,6 +255,7 @@ const Room: React.FC = () => {
       </div>
     </div>
   );
+  
 };
 
 export default Room;
