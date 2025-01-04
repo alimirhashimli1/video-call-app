@@ -140,6 +140,7 @@ const Room: React.FC = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
+      {/* Room URL Section */}
       <div className="relative flex flex-col items-center mb-8 w-full max-w-md">
         <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md text-center">
           Room URL
@@ -161,33 +162,30 @@ const Room: React.FC = () => {
         )}
       </div>
   
-      <div className="flex flex-wrap justify-center mb-6 space-x-4 w-full max-w-md">
-        <button
-          onClick={startVideo}
-          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
-            isVideoActive
-              ? "bg-teal-600 text-white hover:bg-teal-700"
-              : "bg-gray-400 text-gray-800 hover:bg-gray-500"
-          } w-32 mb-4 md:mb-0`}
-        >
-          {isVideoActive ? "Stop Video" : "Start Video"}
-        </button>
+      {/* Buttons for Call and Video */}
+      <div className="flex space-x-4 mb-8">
         <button
           onClick={startCall}
-          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
-            isCallActive
-              ? "bg-red-600 text-white hover:bg-red-700"
-              : "bg-green-600 text-white hover:bg-green-700"
-          } w-32 mb-4 md:mb-0`}
+          className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300"
         >
-          {isCallActive ? "End Call" : "Start Call"}
+          Start Call
+        </button>
+        <button
+          onClick={startVideo}
+          className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+        >
+          Start Video
         </button>
       </div>
   
-      <div className="flex flex-col items-center space-y-4">
+      {/* Video Section */}
+      <div className="flex justify-center items-center w-full h-full relative">
+        {/* Local Video */}
         <div
-          className={`relative transition-all ${
-            isLocalVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          className={`absolute transition-all ${
+            isLocalVideoEnlarged
+              ? "w-full h-full z-10"
+              : "w-3/4 h-3/4 left-0 top-0 z-0"
           }`}
         >
           <video
@@ -197,15 +195,22 @@ const Room: React.FC = () => {
             className="w-full h-full object-cover rounded-lg"
           />
           <button
-            onClick={() => setIsLocalVideoEnlarged(!isLocalVideoEnlarged)}
-            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+            onClick={() => {
+              setIsLocalVideoEnlarged(!isLocalVideoEnlarged);
+              setIsRemoteVideoEnlarged(false); // Ensure the remote video is minimized
+            }}
+            className="absolute bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md"
           >
             {isLocalVideoEnlarged ? "Minimize Local" : "Enlarge Local"}
           </button>
         </div>
+  
+        {/* Remote Video */}
         <div
-          className={`relative transition-all ${
-            isRemoteVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          className={`absolute transition-all ${
+            isRemoteVideoEnlarged
+              ? "w-full h-full z-10"
+              : "w-1/4 h-1/4 right-4 bottom-4 z-0"
           }`}
         >
           <video
@@ -214,15 +219,19 @@ const Room: React.FC = () => {
             className="w-full h-full object-cover rounded-lg"
           />
           <button
-            onClick={() => setIsRemoteVideoEnlarged(!isRemoteVideoEnlarged)}
-            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+            onClick={() => {
+              setIsRemoteVideoEnlarged(!isRemoteVideoEnlarged);
+              setIsLocalVideoEnlarged(false); // Ensure the local video is minimized
+            }}
+            className="absolute bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md"
           >
             {isRemoteVideoEnlarged ? "Minimize Remote" : "Enlarge Remote"}
           </button>
         </div>
       </div>
   
-      <div className="w-full max-w-md">
+      {/* Chat Section */}
+      <div className="w-full max-w-md mt-4">
         <div className="flex items-center space-x-4">
           <input
             type="text"
@@ -255,6 +264,7 @@ const Room: React.FC = () => {
       </div>
     </div>
   );
+  
   
 };
 
