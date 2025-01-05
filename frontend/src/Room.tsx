@@ -4,7 +4,6 @@ import { socket } from "./socket/socket";
 
 const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
-
 const Room: React.FC = () => {
   const [messages, setMessages] = useState<
     { text: string; sender: "self" | "other" }[]
@@ -19,11 +18,9 @@ const Room: React.FC = () => {
   const [isLocalVideoEnlarged, setIsLocalVideoEnlarged] = useState(false);
   const [isRemoteVideoEnlarged, setIsRemoteVideoEnlarged] = useState(false);
 
-
   const { roomId } = useParams<{ roomId: string }>();
 
   const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
-
 
   useEffect(() => {
     socket.emit("joinRoom", roomId);
@@ -49,7 +46,7 @@ const Room: React.FC = () => {
     if (roomId) {
       navigator.clipboard.writeText(roomUrl);
       setShowCopyModal(true);
-      setTimeout(() => setShowCopyModal(false), 2000); 
+      setTimeout(() => setShowCopyModal(false), 2000);
     }
   };
 
@@ -137,7 +134,6 @@ const Room: React.FC = () => {
     }
   };
 
-
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
       <div className="relative flex flex-col items-center mb-8 w-full max-w-md">
@@ -153,14 +149,14 @@ const Room: React.FC = () => {
         >
           Copy URL
         </button>
-  
+
         {showCopyModal && (
           <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
             <p className="text-sm font-medium">Room URL copied to clipboard!</p>
           </div>
         )}
       </div>
-  
+
       <div className="flex flex-wrap justify-center mb-6 space-x-4 w-full max-w-md">
         <button
           onClick={startVideo}
@@ -183,7 +179,7 @@ const Room: React.FC = () => {
           {isCallActive ? "End Call" : "Start Call"}
         </button>
       </div>
-  
+
       <div className="flex flex-col items-center space-y-4">
         <div
           className={`relative transition-all ${
@@ -221,19 +217,19 @@ const Room: React.FC = () => {
           </button>
         </div>
       </div>
-  
+
       <div className="w-full max-w-md">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 mt-6">
           <input
             type="text"
+            className="w-full p-2 text-gray-800 rounded-lg shadow-md"
+            placeholder="Type your message"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Type a message"
           />
           <button
             onClick={sendMessage}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
           >
             Send
           </button>
@@ -242,10 +238,8 @@ const Room: React.FC = () => {
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`p-2 rounded-lg ${
-                msg.sender === "self"
-                  ? "bg-blue-600 text-white text-right"
-                  : "bg-gray-300 text-black"
+              className={`text-gray-800 font-medium px-4 py-2 rounded-lg ${
+                msg.sender === "self" ? "bg-blue-100" : "bg-gray-200"
               }`}
             >
               {msg.text}
@@ -255,7 +249,6 @@ const Room: React.FC = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Room;
