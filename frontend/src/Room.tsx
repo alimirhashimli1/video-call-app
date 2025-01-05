@@ -5,9 +5,10 @@ import { socket } from "./socket/socket";
 const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
 const Room: React.FC = () => {
-  const [messages, setMessages] = useState<
-    { text: string; sender: "self" | "other" }[]
-  >([]);
+  const [messages, setMessages] = useState<{
+    text: string;
+    sender: "self" | "other";
+  }[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
@@ -66,6 +67,7 @@ const Room: React.FC = () => {
         .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
       peerConnectionRef.current.ontrack = (event) => {
+        console.log("Remote track received:", event); // Debugging the remote track
         if (remoteVideoRef.current && event.streams[0]) {
           remoteVideoRef.current.srcObject = event.streams[0];
         }
@@ -188,9 +190,7 @@ const Room: React.FC = () => {
           </div>
         </div>
         <div
-          className={`flex-1 ${
-            fullScreenVideo ? "flex" : "hidden"
-          } justify-center items-center`}
+          className={`flex-1 ${fullScreenVideo ? "flex" : "hidden"} justify-center items-center`}
         >
           <video
             ref={fullScreenVideo === "local" ? localVideoRef : remoteVideoRef}
@@ -221,12 +221,12 @@ const Room: React.FC = () => {
                 type="text"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
-                className="flex-grow p-2 border border-gray-300 rounded-l"
                 placeholder="Type a message"
+                className="flex-grow p-2 border rounded"
               />
               <button
                 onClick={sendMessage}
-                className="bg-blue-500 text-white p-2 rounded-r"
+                className="bg-blue-500 text-white p-2 rounded ml-2"
               >
                 Send
               </button>
@@ -234,10 +234,9 @@ const Room: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* Copy Modal */}
       {showCopyModal && (
-        <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
-          <p className="text-sm font-medium">Room URL copied to clipboard!</p>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow-md">
+          <p className="text-center text-sm">Room URL copied to clipboard!</p>
         </div>
       )}
     </div>
