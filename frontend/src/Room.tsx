@@ -4,23 +4,26 @@ import { socket } from "./socket/socket";
 
 const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
+
 const Room: React.FC = () => {
-  const [messages, setMessages] = useState<{
-    text: string;
-    sender: "self" | "other";
-  }[]>([]);
+  const [messages, setMessages] = useState<
+    { text: string; sender: "self" | "other" }[]
+  >([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
-  const [showCopyModal, setShowCopyModal] = useState(false);
-  const [fullScreenVideo, setFullScreenVideo] = useState<"local" | "remote" | null>(null);
-
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [isLocalVideoEnlarged, setIsLocalVideoEnlarged] = useState(false);
+  const [isRemoteVideoEnlarged, setIsRemoteVideoEnlarged] = useState(false);
+
 
   const { roomId } = useParams<{ roomId: string }>();
+
   const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
+
 
   useEffect(() => {
     socket.emit("joinRoom", roomId);
@@ -46,7 +49,7 @@ const Room: React.FC = () => {
     if (roomId) {
       navigator.clipboard.writeText(roomUrl);
       setShowCopyModal(true);
-      setTimeout(() => setShowCopyModal(false), 2000);
+      setTimeout(() => setShowCopyModal(false), 2000); 
     }
   };
 
@@ -67,7 +70,6 @@ const Room: React.FC = () => {
         .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
       peerConnectionRef.current.ontrack = (event) => {
-        console.log("Remote track received:", event); // Debugging the remote track
         if (remoteVideoRef.current && event.streams[0]) {
           remoteVideoRef.current.srcObject = event.streams[0];
         }
@@ -135,112 +137,125 @@ const Room: React.FC = () => {
     }
   };
 
-  const toggleFullScreen = (type: "local" | "remote") => {
-    setFullScreenVideo((prev) => (prev === type ? null : type));
-  };
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h1 className="text-xl font-bold">Room URL</h1>
-          <div className="flex items-center space-x-2">
-            <p className="text-sm">{roomUrl}</p>
-            <button onClick={handleCopy} className="bg-blue-500 text-white p-2 rounded">
-              Copy
-            </button>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={startVideo}
-            className="bg-green-500 text-white p-2 rounded"
-          >
-            {isVideoActive ? "Stop Video" : "Start Video"}
-          </button>
-          <button
-            onClick={startCall}
-            className="bg-red-500 text-white p-2 rounded"
-          >
-            {isCallActive ? "End Call" : "Start Call"}
-          </button>
-        </div>
-      </div>
-      <div className="flex flex-1">
-        <div
-          className={`flex flex-1 ${fullScreenVideo ? "hidden" : "flex"}`}
-          style={{ width: "80%" }}
+    <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
+      <div className="relative flex flex-col items-center mb-8 w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md text-center">
+          Room URL
+        </h1>
+        <p className="mt-4 text-lg text-gray-700 font-medium px-4 py-2 bg-gray-100 rounded-lg shadow-sm">
+          {roomUrl}
+        </p>
+        <button
+          onClick={handleCopy}
+          className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
         >
-          <div className="flex-1 relative">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              onDoubleClick={() => toggleFullScreen("local")}
-              className="w-full h-full object-cover"
-            />
+          Copy URL
+        </button>
+  
+        {showCopyModal && (
+          <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
+            <p className="text-sm font-medium">Room URL copied to clipboard!</p>
           </div>
-          <div className="flex-1 relative">
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              onDoubleClick={() => toggleFullScreen("remote")}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
+        )}
+      </div>
+  
+      <div className="flex flex-wrap justify-center mb-6 space-x-4 w-full max-w-md">
+        <button
+          onClick={startVideo}
+          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
+            isVideoActive
+              ? "bg-teal-600 text-white hover:bg-teal-700"
+              : "bg-gray-400 text-gray-800 hover:bg-gray-500"
+          } w-32 mb-4 md:mb-0`}
+        >
+          {isVideoActive ? "Stop Video" : "Start Video"}
+        </button>
+        <button
+          onClick={startCall}
+          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
+            isCallActive
+              ? "bg-red-600 text-white hover:bg-red-700"
+              : "bg-green-600 text-white hover:bg-green-700"
+          } w-32 mb-4 md:mb-0`}
+        >
+          {isCallActive ? "End Call" : "Start Call"}
+        </button>
+      </div>
+  
+      <div className="flex flex-col items-center space-y-4">
         <div
-          className={`flex-1 ${fullScreenVideo ? "flex" : "hidden"} justify-center items-center`}
+          className={`relative transition-all ${
+            isLocalVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          }`}
         >
           <video
-            ref={fullScreenVideo === "local" ? localVideoRef : remoteVideoRef}
+            ref={localVideoRef}
             autoPlay
-            muted={fullScreenVideo === "local"}
-            onDoubleClick={() => setFullScreenVideo(null)}
-            className="w-full h-full object-cover"
+            muted
+            className="w-full h-full object-cover rounded-lg"
           />
+          <button
+            onClick={() => setIsLocalVideoEnlarged(!isLocalVideoEnlarged)}
+            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+          >
+            {isLocalVideoEnlarged ? "Minimize Local" : "Enlarge Local"}
+          </button>
         </div>
-        <div className="w-1/5 bg-gray-200 p-4">
-          <div className="flex flex-col h-full">
-            <div className="flex-grow overflow-auto">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-2 mb-2 rounded ${
-                    msg.sender === "self"
-                      ? "bg-blue-500 text-white text-right"
-                      : "bg-gray-300 text-black"
-                  }`}
-                >
-                  {msg.text}
-                </div>
-              ))}
-            </div>
-            <div className="flex">
-              <input
-                type="text"
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                placeholder="Type a message"
-                className="flex-grow p-2 border rounded"
-              />
-              <button
-                onClick={sendMessage}
-                className="bg-blue-500 text-white p-2 rounded ml-2"
-              >
-                Send
-              </button>
-            </div>
-          </div>
+        <div
+          className={`relative transition-all ${
+            isRemoteVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          }`}
+        >
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            className="w-full h-full object-cover rounded-lg"
+          />
+          <button
+            onClick={() => setIsRemoteVideoEnlarged(!isRemoteVideoEnlarged)}
+            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+          >
+            {isRemoteVideoEnlarged ? "Minimize Remote" : "Enlarge Remote"}
+          </button>
         </div>
       </div>
-      {showCopyModal && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow-md">
-          <p className="text-center text-sm">Room URL copied to clipboard!</p>
+  
+      <div className="w-full max-w-md">
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Type a message"
+          />
+          <button
+            onClick={sendMessage}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Send
+          </button>
         </div>
-      )}
+        <div className="mt-4 space-y-4">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`p-2 rounded-lg ${
+                msg.sender === "self"
+                  ? "bg-blue-600 text-white text-right"
+                  : "bg-gray-300 text-black"
+              }`}
+            >
+              {msg.text}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
+  
 };
 
 export default Room;
