@@ -68,17 +68,20 @@ const Room: React.FC = () => {
         .getTracks()
         .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
-      peerConnectionRef.current.ontrack = (event) => {
-        if (remoteVideoRef.current && event.streams[0]) {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        }
-      };
+        peerConnectionRef.current.ontrack = (event) => {
+          console.log("Track event: ", event);  // Add a log to check if the event is triggered
+          if (remoteVideoRef.current && event.streams[0]) {
+            remoteVideoRef.current.srcObject = event.streams[0];
+          }
+        };
 
-      peerConnectionRef.current.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit("ice-candidate", { roomId, candidate: event.candidate });
-        }
-      };
+        peerConnectionRef.current.onicecandidate = (event) => {
+          console.log("ICE Candidate:", event.candidate);
+          if (event.candidate) {
+            socket.emit("ice-candidate", { roomId, candidate: event.candidate });
+          }
+        };
+        
     } else {
       const stream = localVideoRef.current?.srcObject as MediaStream;
       stream?.getTracks().forEach((track) => track.stop());
@@ -184,12 +187,13 @@ const Room: React.FC = () => {
             />
           </div>
           <div className="flex-1 relative">
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              onDoubleClick={() => toggleFullScreen("remote")}
-              className="w-full h-full object-cover"
-            />
+          <video
+  ref={remoteVideoRef}
+  autoPlay
+  onDoubleClick={() => toggleFullScreen("remote")}
+  className="w-full h-full object-cover"
+/>
+
           </div>
         </div>
         <div
