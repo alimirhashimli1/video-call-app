@@ -58,8 +58,8 @@ const Home: React.FC = () => {
       </button>
 
       {/* Informational Paragraphs */}
-      <div className="mt-8 text-center space-y-6 max-w-lg">
-        <p className="text-lg font-medium">
+      <div className="mt-8 text-center space-y-6 max-w-lg ">
+        <p className="text-lg font-medium ">
           <span className="underline decoration-blue-500">Test Mode:</span> To try the app, either send the room link to another PC or open it in another tab in your browser.
         </p>
         <p className="text-lg font-medium">
