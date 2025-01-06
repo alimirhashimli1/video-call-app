@@ -210,6 +210,11 @@ const Room: React.FC = () => {
             onDoubleClick={() => setFullScreenVideo(null)}
             className="w-full h-full object-cover"
           />
+           {(!isCallActive || !remoteVideoRef.current?.srcObject) && (
+    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <i className="fas fa-video-slash text-white text-4xl"></i>
+    </div>
+  )}
         </div>
       )}
         <div className="w-1/5 bg-gray-200 p-4">
