@@ -27,8 +27,9 @@ const Room: React.FC = () => {
     socket.emit("joinRoom", roomId);
 
     socket.on("message", (msg: { text: string; senderId: string }) => {
-      const sender = msg.senderId === socket.id ? "self" : "other";
-      setMessages((prev) => [...prev, { text: msg.text, sender }]);
+      if (msg.senderId !== socket.id) {
+        setMessages((prev) => [...prev, { text: msg.text, sender: "other" }]);
+      }
     });
 
     socket.on("offer", handleOffer);
