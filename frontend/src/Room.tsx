@@ -140,12 +140,12 @@ const Room: React.FC = () => {
     setFullScreenVideo((prev) => (prev === type ? null : type));
   };
   return (
-    <div className="h-screen bg-gray-100 flex flex-col p-6">
+    <div className="h-screen bg-gray-900 flex flex-col p-6">
     <div className="flex justify-between items-center mb-4">
            <div>
-          <h1 className="text-xl font-bold">Room URL</h1>
+          <h1 className="text-xl font-bold text-white">Room URL</h1>
           <div className="flex items-center space-x-2">
-            <p className="text-sm">{roomUrl}</p>
+            <p className="text-sm text-white">{roomUrl}</p>
             <button onClick={handleCopy} className="bg-blue-500 text-white p-2 rounded">
               Copy
             </button>
