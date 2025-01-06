@@ -221,6 +221,11 @@ const Room: React.FC = () => {
                 type="text"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
                 placeholder="Type a message"
                 className="flex-grow p-2 border rounded"
               />
