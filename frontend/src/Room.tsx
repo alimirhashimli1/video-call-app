@@ -70,12 +70,13 @@ const Room: React.FC = () => {
         .getTracks()
         .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
-      peerConnectionRef.current.ontrack = (event) => {
-        if (remoteVideoRef.current && event.streams[0]) {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        }
-      };
-
+        peerConnectionRef.current.ontrack = (event) => {
+          console.log("Remote stream received", event.streams[0]);
+          if (remoteVideoRef.current && event.streams[0]) {
+            remoteVideoRef.current.srcObject = event.streams[0];
+          }
+        };
+        
       peerConnectionRef.current.onicecandidate = (event) => {
         if (event.candidate) {
           socket.emit("ice-candidate", { roomId, candidate: event.candidate });
@@ -194,11 +195,12 @@ const Room: React.FC = () => {
     onDoubleClick={() => toggleFullScreen("remote")}
     className="w-full h-full object-cover"
   />
-  {(!isCallActive || !remoteVideoRef.current?.srcObject) && (
-    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <i className="fas fa-video-slash text-white text-4xl"></i>
-    </div>
-  )}
+{(!isCallActive || !remoteVideoRef.current?.srcObject) && (
+  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <i className="fas fa-video-slash text-white text-4xl"></i>
+  </div>
+)}
+
         </div>
       </div>
       {fullScreenVideo && (
