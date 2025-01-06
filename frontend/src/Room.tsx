@@ -4,6 +4,7 @@ import { socket } from "./socket/socket";
 
 const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
+
 const Room: React.FC = () => {
   const [messages, setMessages] = useState<
     { text: string; sender: "self" | "other" }[]
@@ -11,15 +12,18 @@ const Room: React.FC = () => {
   const [messageInput, setMessageInput] = useState<string>("");
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
-  const [showCopyModal, setShowCopyModal] = useState(false);
-  const [fullScreenVideo, setFullScreenVideo] = useState<"local" | "remote" | null>(null);
-
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [isLocalVideoEnlarged, setIsLocalVideoEnlarged] = useState(false);
+  const [isRemoteVideoEnlarged, setIsRemoteVideoEnlarged] = useState(false);
+
 
   const { roomId } = useParams<{ roomId: string }>();
+
   const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
+
 
   useEffect(() => {
     socket.emit("joinRoom", roomId);
@@ -45,7 +49,7 @@ const Room: React.FC = () => {
     if (roomId) {
       navigator.clipboard.writeText(roomUrl);
       setShowCopyModal(true);
-      setTimeout(() => setShowCopyModal(false), 2000);
+      setTimeout(() => setShowCopyModal(false), 2000); 
     }
   };
 
@@ -67,14 +71,12 @@ const Room: React.FC = () => {
 
       peerConnectionRef.current.ontrack = (event) => {
         if (remoteVideoRef.current && event.streams[0]) {
-          console.log("Remote stream received:", event.streams[0]);
           remoteVideoRef.current.srcObject = event.streams[0];
         }
       };
 
       peerConnectionRef.current.onicecandidate = (event) => {
         if (event.candidate) {
-          console.log("Sending ICE Candidate:", event.candidate);
           socket.emit("ice-candidate", { roomId, candidate: event.candidate });
         }
       };
@@ -106,27 +108,23 @@ const Room: React.FC = () => {
   };
 
   const handleOffer = async (offer: RTCSessionDescriptionInit) => {
-    console.log("Received offer:", offer);
     await peerConnectionRef.current?.setRemoteDescription(
       new RTCSessionDescription(offer)
     );
     const answer = await peerConnectionRef.current?.createAnswer();
     if (answer) {
-      console.log("Sending answer:", answer);
       await peerConnectionRef.current?.setLocalDescription(answer);
       socket.emit("answer", { roomId, answer });
     }
   };
 
   const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
-    console.log("Received answer:", answer);
     await peerConnectionRef.current?.setRemoteDescription(
       new RTCSessionDescription(answer)
     );
   };
 
   const handleNewICECandidate = (candidate: RTCIceCandidateInit) => {
-    console.log("Adding ICE Candidate:", candidate);
     const iceCandidate = new RTCIceCandidate(candidate);
     peerConnectionRef.current?.addIceCandidate(iceCandidate);
   };
@@ -139,19 +137,122 @@ const Room: React.FC = () => {
     }
   };
 
-  const toggleFullScreen = (type: "local" | "remote") => {
-    setFullScreenVideo((prev) => (prev === type ? null : type));
-  };
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col p-6">
-      {/* Copy Modal */}
-      {showCopyModal && (
-        <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
-          <p className="text-sm font-medium">Room URL copied to clipboard!</p>
+    <div className="h-screen bg-gray-100 flex flex-col items-center p-6">
+      <div className="relative flex flex-col items-center mb-8 w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-gray-800 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg shadow-md text-center">
+          Room URL
+        </h1>
+        <p className="mt-4 text-lg text-gray-700 font-medium px-4 py-2 bg-gray-100 rounded-lg shadow-sm">
+          {roomUrl}
+        </p>
+        <button
+          onClick={handleCopy}
+          className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+        >
+          Copy URL
+        </button>
+
+        {showCopyModal && (
+          <div className="absolute top-16 p-4 bg-gray-800 text-white rounded-lg shadow-lg transition-transform duration-500 animate-fade-in-out">
+            <p className="text-sm font-medium">Room URL copied to clipboard!</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap justify-center mb-6 space-x-4 w-full max-w-md">
+        <button
+          onClick={startVideo}
+          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
+            isVideoActive
+              ? "bg-teal-600 text-white hover:bg-teal-700"
+              : "bg-gray-400 text-gray-800 hover:bg-gray-500"
+          } w-32 mb-4 md:mb-0`}
+        >
+          {isVideoActive ? "Stop Video" : "Start Video"}
+        </button>
+        <button
+          onClick={startCall}
+          className={`px-6 py-3 font-semibold rounded-lg shadow-md ${
+            isCallActive
+              ? "bg-red-600 text-white hover:bg-red-700"
+              : "bg-green-600 text-white hover:bg-green-700"
+          } w-32 mb-4 md:mb-0`}
+        >
+          {isCallActive ? "End Call" : "Start Call"}
+        </button>
+      </div>
+
+      <div className="flex flex-col items-center space-y-4">
+        <div
+          className={`relative transition-all ${
+            isLocalVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          }`}
+        >
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            className="w-full h-full object-cover rounded-lg"
+          />
+          <button
+            onClick={() => setIsLocalVideoEnlarged(!isLocalVideoEnlarged)}
+            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+          >
+            {isLocalVideoEnlarged ? "Minimize Local" : "Enlarge Local"}
+          </button>
         </div>
-      )}
-      {/* The rest of the component remains the same */}
+        <div
+          className={`relative transition-all ${
+            isRemoteVideoEnlarged ? "w-full h-96" : "w-1/3 h-32"
+          }`}
+        >
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            className="w-full h-full object-cover rounded-lg"
+          />
+          <button
+            onClick={() => setIsRemoteVideoEnlarged(!isRemoteVideoEnlarged)}
+            className="absolute bottom-2 right-2 bg-gray-800 text-white px-4 py-2 rounded-md"
+          >
+            {isRemoteVideoEnlarged ? "Minimize Remote" : "Enlarge Remote"}
+          </button>
+        </div>
+      </div>
+
+      <div className="w-full max-w-md">
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Type a message"
+          />
+          <button
+            onClick={sendMessage}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Send
+          </button>
+        </div>
+        <div className="mt-4 space-y-4">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`p-2 rounded-lg ${
+                msg.sender === "self"
+                  ? "bg-blue-600 text-white text-right"
+                  : "bg-gray-300 text-black"
+              }`}
+            >
+              {msg.text}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
