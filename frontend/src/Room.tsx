@@ -13,7 +13,7 @@ const Room: React.FC = () => {
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
-  // const [fullScreenVideo, setFullScreenVideo] = useState<"local" | "remote" | null>(null);
+  const [fullScreenVideo, setFullScreenVideo] = useState<"local" | "remote" | null>(null);
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -21,6 +21,7 @@ const Room: React.FC = () => {
 
   const { roomId } = useParams<{ roomId: string }>();
   const roomUrl = roomId ? `${window.location.origin}/room/${roomId}` : "";
+
 
   useEffect(() => {
     socket.emit("joinRoom", roomId);
@@ -67,7 +68,6 @@ const Room: React.FC = () => {
         .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
       peerConnectionRef.current.ontrack = (event) => {
-        console.log("Remote track received:", event); // Debugging the remote track
         if (remoteVideoRef.current && event.streams[0]) {
           remoteVideoRef.current.srcObject = event.streams[0];
         }
@@ -135,14 +135,13 @@ const Room: React.FC = () => {
     }
   };
 
-  // const toggleFullScreen = (type: "local" | "remote") => {
-  //   setFullScreenVideo((prev) => (prev === type ? null : type));
-  // };
-
+  const toggleFullScreen = (type: "local" | "remote") => {
+    setFullScreenVideo((prev) => (prev === type ? null : type));
+  };
   return (
     <div className="h-screen bg-gray-100 flex flex-col p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div>
+    <div className="flex justify-between items-center mb-4">
+           <div>
           <h1 className="text-xl font-bold">Room URL</h1>
           <div className="flex items-center space-x-2">
             <p className="text-sm">{roomUrl}</p>
@@ -151,55 +150,55 @@ const Room: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={startVideo}
-            className="bg-green-500 text-white p-2 rounded"
-          >
-            {isVideoActive ? "Stop Video" : "Start Video"}
-          </button>
-          <button
-            onClick={startCall}
-            className="bg-red-500 text-white p-2 rounded"
-          >
-            {isCallActive ? "End Call" : "Start Call"}
-          </button>
-        </div>
+      <div className="flex space-x-2">
+        <button
+          onClick={startVideo}
+          className="bg-green-500 text-white p-2 rounded"
+        >
+          {isVideoActive ? "Stop Video" : "Start Video"}
+        </button>
+        <button
+          onClick={startCall}
+          className="bg-red-500 text-white p-2 rounded"
+        >
+          {isCallActive ? "End Call" : "Start Call"}
+        </button>
       </div>
-      <div className="flex flex-1">
-        <div
-          // className={`flex flex-1 ${fullScreenVideo ? "hidden" : "flex"}`}
-          style={{ width: "80%" }}
-        >
-          <div className="flex-1 relative">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              // onDoubleClick={() => toggleFullScreen("local")}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="flex-1 relative">
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              // onDoubleClick={() => toggleFullScreen("remote")}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-        <div
-          // className={`flex-1 ${fullScreenVideo ? "flex" : "hidden"} justify-center items-center`}
-        >
+    </div>
+    <div className="flex flex-1">
+      <div
+        className={`flex flex-1 ${fullScreenVideo ? "hidden" : "flex"}`}
+        style={{ width: "80%" }}
+      >
+        <div className="flex-1 relative">
           <video
-            // ref={fullScreenVideo === "local" ? localVideoRef : remoteVideoRef}
+            ref={localVideoRef}
             autoPlay
-            // muted={fullScreenVideo === "local"}
-            // onDoubleClick={() => setFullScreenVideo(null)}
+            muted
+            onDoubleClick={() => toggleFullScreen("local")}
             className="w-full h-full object-cover"
           />
         </div>
+        <div className="flex-1 relative">
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            onDoubleClick={() => toggleFullScreen("remote")}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+      {fullScreenVideo && (
+        <div className="flex-1 flex justify-center items-center">
+          <video
+            ref={fullScreenVideo === "local" ? localVideoRef : remoteVideoRef}
+            autoPlay
+            muted={fullScreenVideo === "local"}
+            onDoubleClick={() => setFullScreenVideo(null)}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
         <div className="w-1/5 bg-gray-200 p-4">
           <div className="flex flex-col h-full">
             <div className="flex-grow overflow-auto">
