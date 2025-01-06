@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { socket } from "./socket/socket";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-
 
 const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
@@ -70,13 +68,12 @@ const Room: React.FC = () => {
         .getTracks()
         .forEach((track) => peerConnectionRef.current?.addTrack(track, stream));
 
-        peerConnectionRef.current.ontrack = (event) => {
-          console.log("Remote stream received", event.streams[0]);
-          if (remoteVideoRef.current && event.streams[0]) {
-            remoteVideoRef.current.srcObject = event.streams[0];
-          }
-        };
-        
+      peerConnectionRef.current.ontrack = (event) => {
+        if (remoteVideoRef.current && event.streams[0]) {
+          remoteVideoRef.current.srcObject = event.streams[0];
+        }
+      };
+
       peerConnectionRef.current.onicecandidate = (event) => {
         if (event.candidate) {
           socket.emit("ice-candidate", { roomId, candidate: event.candidate });
@@ -175,32 +172,21 @@ const Room: React.FC = () => {
         style={{ width: "80%" }}
       >
         <div className="flex-1 relative">
-        <video
-    ref={localVideoRef}
-    autoPlay
-    muted
-    onDoubleClick={() => toggleFullScreen("local")}
-    className="w-full h-full object-cover"
-  />
-  {!isVideoActive && (
-    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <i className="fas fa-video-slash text-white text-4xl"></i>
-    </div>
-  )}
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            onDoubleClick={() => toggleFullScreen("local")}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="flex-1 relative">
-        <video
-    ref={remoteVideoRef}
-    autoPlay
-    onDoubleClick={() => toggleFullScreen("remote")}
-    className="w-full h-full object-cover"
-  />
-{(!isCallActive || !remoteVideoRef.current?.srcObject) && (
-  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <i className="fas fa-video-slash text-white text-4xl"></i>
-  </div>
-)}
-
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            onDoubleClick={() => toggleFullScreen("remote")}
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
       {fullScreenVideo && (
@@ -212,11 +198,6 @@ const Room: React.FC = () => {
             onDoubleClick={() => setFullScreenVideo(null)}
             className="w-full h-full object-cover"
           />
-           {(!isCallActive || !remoteVideoRef.current?.srcObject) && (
-    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <i className="fas fa-video-slash text-white text-4xl"></i>
-    </div>
-  )}
         </div>
       )}
         <div className="w-1/5 bg-gray-200 p-4">
