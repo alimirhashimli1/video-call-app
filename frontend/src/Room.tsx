@@ -13,7 +13,7 @@ const Room: React.FC = () => {
   const [isVideoActive, setIsVideoActive] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
-  const [fullScreenVideo, setFullScreenVideo] = useState<"local" | "remote" | null>(null);
+  // const [fullScreenVideo, setFullScreenVideo] = useState<"local" | "remote" | null>(null);
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -135,9 +135,9 @@ const Room: React.FC = () => {
     }
   };
 
-  const toggleFullScreen = (type: "local" | "remote") => {
-    setFullScreenVideo((prev) => (prev === type ? null : type));
-  };
+  // const toggleFullScreen = (type: "local" | "remote") => {
+  //   setFullScreenVideo((prev) => (prev === type ? null : type));
+  // };
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col p-6">
@@ -168,7 +168,7 @@ const Room: React.FC = () => {
       </div>
       <div className="flex flex-1">
         <div
-          className={`flex flex-1 ${fullScreenVideo ? "hidden" : "flex"}`}
+          // className={`flex flex-1 ${fullScreenVideo ? "hidden" : "flex"}`}
           style={{ width: "80%" }}
         >
           <div className="flex-1 relative">
@@ -176,7 +176,7 @@ const Room: React.FC = () => {
               ref={localVideoRef}
               autoPlay
               muted
-              onDoubleClick={() => toggleFullScreen("local")}
+              // onDoubleClick={() => toggleFullScreen("local")}
               className="w-full h-full object-cover"
             />
           </div>
@@ -184,19 +184,19 @@ const Room: React.FC = () => {
             <video
               ref={remoteVideoRef}
               autoPlay
-              onDoubleClick={() => toggleFullScreen("remote")}
+              // onDoubleClick={() => toggleFullScreen("remote")}
               className="w-full h-full object-cover"
             />
           </div>
         </div>
         <div
-          className={`flex-1 ${fullScreenVideo ? "flex" : "hidden"} justify-center items-center`}
+          // className={`flex-1 ${fullScreenVideo ? "flex" : "hidden"} justify-center items-center`}
         >
           <video
-            ref={fullScreenVideo === "local" ? localVideoRef : remoteVideoRef}
+            // ref={fullScreenVideo === "local" ? localVideoRef : remoteVideoRef}
             autoPlay
-            muted={fullScreenVideo === "local"}
-            onDoubleClick={() => setFullScreenVideo(null)}
+            // muted={fullScreenVideo === "local"}
+            // onDoubleClick={() => setFullScreenVideo(null)}
             className="w-full h-full object-cover"
           />
         </div>
